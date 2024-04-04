@@ -1,0 +1,101 @@
+version: '3.8'
+services:
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    container_name: zabbix-server
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      DB_SERVER_PORT: "$MYSQL_PORT"
+      DB_SERVER_HOST: mysql-server
+      MYSQL_DATABASE: "$MYSQL_DB"
+      MYSQL_USER: "$MYSQL_USER"
+      MYSQL_PASSWORD: "$MYSQL_PASSWORD"
+      ZBX_JAVAGATEWAY: zabbix-java-gateway
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+        #    - ./zabbix:/etc/zabbix
+    ports:
+      - 10551:10051
+    depends_on:
+      - mysql-server
+    networks:
+      zabbix-network:
+        ipv4_address: 172.16.100.103
+        aliases:
+          - zabbix-server
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:latest
+    container_name: zabbix-web
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: mysql-server
+      MYSQL_DATABASE: "$MYSQL_DB"
+      MYSQL_USER: "$MYSQL_USER"
+      MYSQL_PASSWORD: "$MYSQL_PASSWORD"
+    ports:
+      - 9080:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - zabbix-server
+    networks:
+      zabbix-network:
+        ipv4_address: 172.16.100.102
+        aliases:
+          - zabbix-web
+  zabbix-agent:
+    image: zabbix/zabbix-agent2:latest
+    container_name: zabbix-agent
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    depends_on:
+      - zabbix-server
+      - zabbix-web
+    ports:
+      - "10651:10051"
+      - "10550:10050"
+    networks:
+      - zabbix-network
+  grafana-server:
+    container_name: grafana-server
+    image: grafana/grafana-oss:latest
+    networks:
+      zabbix-network:
+        ipv4_address: 172.16.100.110
+        aliases:
+          - grafana-server
+    restart: always
+    ports:
+      - '4000:3000'
+    user: "$UID:$GID"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./grafana/lib:/var/lib/grafana
+      - ./grafana/log:/var/log/grafana
+        # - ./grafana/etc:/etc/grafana
+networks:
+  zabbix-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.100.0/24
