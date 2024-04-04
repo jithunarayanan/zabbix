@@ -46,8 +46,7 @@ mysql> quit;
 - Install the Zabbix plugin for Grafana using grafana-cli:
 For more installation options, refer to the [official documentation](https://grafana.com/docs/plugins/alexanderzobnin-zabbix-app/latest/installation/).
 
->>**Note**
-Before run the docker-compose file make sure that, your .env file is proporly configured.
+>>**Note:** Ensure that the .env file is updated with the correct variables before running the docker-compose file.
 
 ## Getting Started Grafana
 1. Login to Grafana in *localhost:3000*.
