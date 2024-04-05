@@ -4,14 +4,12 @@ services:
     image: zabbix/zabbix-server-mysql:latest
     container_name: zabbix-server
     restart: unless-stopped
-    env_file:
-      - ../.env
     environment:
-      DB_SERVER_PORT: "$MYSQL_PORT"
-      DB_SERVER_HOST: mysql-server
-      MYSQL_DATABASE: "$MYSQL_DB"
-      MYSQL_USER: "$MYSQL_USER"
-      MYSQL_PASSWORD: "$MYSQL_PASSWORD"
+      DB_SERVER_PORT: $DB_SERVER_PORT
+      DB_SERVER_HOST: $DB_SERVER_HOST
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
       ZBX_JAVAGATEWAY: zabbix-java-gateway
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -19,8 +17,6 @@ services:
         #    - ./zabbix:/etc/zabbix
     ports:
       - 10551:10051
-    depends_on:
-      - mysql-server
     networks:
       zabbix-network:
         ipv4_address: 172.16.100.103
@@ -30,14 +26,13 @@ services:
     image: zabbix/zabbix-web-nginx-mysql:latest
     container_name: zabbix-web
     restart: unless-stopped
-    env_file:
-      - ../.env
     environment:
       ZBX_SERVER_HOST: zabbix-server
-      DB_SERVER_HOST: mysql-server
-      MYSQL_DATABASE: "$MYSQL_DB"
-      MYSQL_USER: "$MYSQL_USER"
-      MYSQL_PASSWORD: "$MYSQL_PASSWORD"
+      DB_SERVER_HOST: $DB_SERVER_HOST
+      DB_SERVER_PORT: $DB_SERVER_PORT
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
     ports:
       - 9080:8080
     healthcheck:
@@ -57,8 +52,6 @@ services:
     image: zabbix/zabbix-agent2:latest
     container_name: zabbix-agent
     restart: unless-stopped
-    env_file:
-      - ../.env
     environment:
       ZBX_SERVER_HOST: zabbix-server
     volumes:
