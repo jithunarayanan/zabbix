@@ -16,7 +16,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
         #    - ./zabbix:/etc/zabbix
     ports:
-      - 10551:10051
+      - 10051:10051
     networks:
       zabbix-network:
         ipv4_address: 172.16.100.103
@@ -34,7 +34,7 @@ services:
       MYSQL_USER: $MYSQL_USER
       MYSQL_PASSWORD: $MYSQL_PASSWORD
     ports:
-      - 9080:8080
+      - 8080:8080
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 10s
@@ -61,8 +61,8 @@ services:
       - zabbix-server
       - zabbix-web
     ports:
-      - "10651:10051"
-      - "10550:10050"
+      - "10051:10051"
+      - "10050:10050"
     networks:
       - zabbix-network
   grafana-server:
@@ -75,7 +75,7 @@ services:
           - grafana-server
     restart: always
     ports:
-      - '4000:3000'
+      - '3000:3000'
     user: "$UID:$GID"
     volumes:
       - /etc/localtime:/etc/localtime:ro
