@@ -1,4 +1,7 @@
 # Zabbix Stack with Grafana
+<div style="text-align:center">
+  <img src="./Zabbix_logo.svg" alt="zabbix" />
+</div>
 This Docker Compose setup includes the following components:
 
 1. **Zabbix Server:** Monitors and collects data from various devices and systems.
